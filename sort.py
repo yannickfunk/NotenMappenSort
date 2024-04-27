@@ -99,9 +99,9 @@ for _folder, _parts in FOLDER_TO_PART.items():
 PART_TO_FOLDER: Dict[str, List[str]] = dict(_part_to_folder)
 
 
-def sort_folders(folders: Dict[str, List[Path]]) -> Dict[str, List[Path]]:
+def sort_folders(folders: Dict[str, set[Path]]) -> Dict[str, List[Path]]:
     return {
-        folder: sorted(pdf_paths, key=lambda x: x.parts[-2])
+        folder: sorted(list(pdf_paths), key=lambda x: x.parts[-2])
         for folder, pdf_paths in folders.items()
     }
 
@@ -125,7 +125,7 @@ def create_folder_pdfs(folders: Dict[str, List[Path]]):
 
 
 def main():
-    folders: Dict[str, List[Path]] = defaultdict(list)  # maps folder title to pdf path
+    folders: Dict[str, set[Path]] = defaultdict(set)  # maps folder title to pdf path
 
     for song in os.listdir(SHEET_FOLDER_PATH):
         suffix = "_" + song + ".pdf"
@@ -134,13 +134,13 @@ def main():
             part = part[: -len(suffix)]
             destination_folders = PART_TO_FOLDER[part] if part in PART_TO_FOLDER else []
             for folder in destination_folders:
-                folders[folder].append(pdf_path)
+                folders[folder].add(pdf_path)
 
     # ensure the songs in each folder are sorted by song name
-    folders = sort_folders(folders)
+    sorted_folders = sort_folders(folders)
 
     # create the pdfs for each folder
-    create_folder_pdfs(folders)
+    create_folder_pdfs(sorted_folders)
 
 
 if __name__ == "__main__":
