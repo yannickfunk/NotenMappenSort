@@ -59,14 +59,15 @@ for song in os.listdir(SHEET_FOLDER_PATH):
         if song in SINGLE_PAGE_DOUBLE_SHEETS:
             writer = split_single_page_to_double_page(reader)
         else:
-            _, _, width, heigth = reader.pages[0].cropbox
-            if width > heigth:
-                reader.pages[0].rotate(-90)
-                reader.pages[0].scale_to(PaperSize.A4.height, PaperSize.A4.width)
-            else:
-                reader.pages[0].scale_to(PaperSize.A4.width, PaperSize.A4.height)
             writer = PdfWriter()
-            writer.add_page(reader.pages[0])
+            for page in reader.pages:
+                _, _, width, heigth = page.cropbox
+                if width > heigth:
+                    page.rotate(-90)
+                    page.scale_to(PaperSize.A4.height, PaperSize.A4.width)
+                else:
+                    page.scale_to(PaperSize.A4.width, PaperSize.A4.height)
+                writer.add_page(page)
 
         with open(OUTPUT_PATH / song / part, "wb") as f:
             writer.write(f)
