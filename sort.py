@@ -6,7 +6,7 @@ from typing import Dict, List
 from PyPDF2 import PdfMerger
 from tqdm import tqdm
 
-SHEET_FOLDER_PATH = Path("/mnt/c/Users/Yannick/2024-04-21 Scan aller Noten")
+SHEET_FOLDER_PATH = Path("/mnt/c/Users/Yannick/Noten-Cropped")
 OUTPUT_PATH = Path("/mnt/c/Users/Yannick/Notenmappen-Sortiert")
 
 # define which folder contains which parts
