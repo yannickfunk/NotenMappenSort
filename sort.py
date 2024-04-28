@@ -9,6 +9,8 @@ from tqdm import tqdm
 SHEET_FOLDER_PATH = Path("/mnt/c/Users/Yannick/Noten-Cropped")
 OUTPUT_PATH = Path("/mnt/c/Users/Yannick/Notenmappen-Sortiert")
 
+REPERTOIRE = os.listdir(SHEET_FOLDER_PATH)
+
 # define which folder contains which parts
 FOLDER_TO_PART = {
     "1. Flöte + Piccolo": ["Flöte_1_C", "Flöte_C", "Piccolo_C"],  # 1 mal
@@ -30,10 +32,10 @@ FOLDER_TO_PART = {
     "1. Trompete": ["Trompete_1_B", "Trompete_B", "Trompete_Solo_B"],  # 1 mal
     "2. Trompete": ["Trompete_2_B", "Tompete_2_B"],  # 1 mal
     "3. + 4. Trompete": ["Trompete_3_B", "Trompete_4_B"],  # 1 mal
-    "Flügelhorn_1_B": ["Flügelhorn_1-B", "Flügelhorn_1_B"],  # 2 mal
-    "Flügelhorn_2_B": ["Flügelhorn_2_B", "Flügelhorn_3_B"],  # 2 mal
-    "Tenorhorn_1-B": ["Tenorhorn_1-B", "Tenorhorn_1_B", "Tenorhorn_B"],  # 2 mal
-    "Tenorhorn_2_B": ["Tenorhorn_2_B", "Tenorhorn_B"],  # 1 mal
+    "1. Flügelhorn": ["Flügelhorn_1-B", "Flügelhorn_1_B"],  # 2 mal
+    "2. Flügelhorn": ["Flügelhorn_2_B", "Flügelhorn_3_B"],  # 2 mal
+    "1. Tenorhorn in B": ["Tenorhorn_1-B", "Tenorhorn_1_B", "Tenorhorn_B"],  # 2 mal
+    "2. Tenorhorn in B": ["Tenorhorn_2_B", "Tenorhorn_B"],  # 1 mal
     "1. (3.) Horn in F": [
         "Horn_1_F",
         "Horn_Melodie_1_F",
@@ -67,7 +69,7 @@ FOLDER_TO_PART = {
         "Posaune_Begleitung_3_C",
     ],  # 1 mal
     "Bariton in B": ["Bariton_B", "Bariton_B_Violin"],  # 2 mal
-    "Bariton_C": ["Bariton_C"],  # 2 mal
+    "Bariton in C": ["Bariton_C"],  # 2 mal
     "1. Bass in C": ["Bass_1_C", "Bass_C"],  # 1 mal
     "2. Bass in C": ["Bass_2_C", "Bass_C"],  # 1 mal
     "Bass in B + Eb": [
@@ -89,6 +91,24 @@ FOLDER_TO_PART = {
         "Löffel_Solo",
         "Tamburin",
     ],
+}
+
+# Define replacements for missing parts
+REPLACEMENTS = {
+    "1. Alt-Saxophon": ["Es-Klarinette"],
+    "2. Alt-Saxophon": ["1. Alt-Saxophon", "Es-Klarinette"],
+    "Tenor-Saxophon + BariSax": ["1. Tenorhorn in B"],
+    "2. Bass in C": ["1. Bass in C"],
+    "2. Flöte": ["1. Flöte"],
+    "2. (4.) Horn in F": ["1. (3.) Horn in F"],
+    "2. Klarinette": ["1. Klarinette"],
+    "3. Klarinette": ["2. Klarinette", "1. Klarinette"],
+    "3. Posaune": ["2. Posaune", "1. Posaune"],
+    "2. Tenorhorn in B": ["1. Tenorhorn in B"],
+    "2. Trompete": ["1. Trompete"],
+    "3. + 4. Trompete": ["2. Trompete", "1. Trompete"],
+    "2. Flügelhorn": ["1. Flügelhorn", "2. Trompete"],
+    "1. Flügelhorn": ["1. Trompete"],
 }
 
 # make reverse dict for later sorting
@@ -124,10 +144,10 @@ def create_folder_pdfs(folders: Dict[str, List[Path]]):
         merge_pdfs(pdf_paths, output_file)
 
 
-def main():
+def create_folders() -> Dict[str, set[Path]]:
     folders: Dict[str, set[Path]] = defaultdict(set)  # maps folder title to pdf path
 
-    for song in os.listdir(SHEET_FOLDER_PATH):
+    for song in REPERTOIRE:
         suffix = "_" + song + ".pdf"
         for part in os.listdir(SHEET_FOLDER_PATH / song):
             pdf_path = SHEET_FOLDER_PATH / song / part
@@ -135,12 +155,43 @@ def main():
             destination_folders = PART_TO_FOLDER[part] if part in PART_TO_FOLDER else []
             for folder in destination_folders:
                 folders[folder].add(pdf_path)
+    return folders
 
-    # ensure the songs in each folder are sorted by song name
-    sorted_folders = sort_folders(folders)
+
+def create_folder_reports(
+    folders: Dict[str, set[Path]]
+) -> Dict[str, Dict[str, List[str]]]:
+    folder_reports: Dict[str, Dict[str, List[str]]] = dict()
+    for folder, pdf_paths in folders.items():
+        folder_reports[folder] = {song: [] for song in REPERTOIRE}
+        for pdf_path in pdf_paths:
+            song = pdf_path.parts[-2]
+            folder_reports[folder][song].append(pdf_path.stem[: -(len(song) + 1)])
+    return folder_reports
+
+
+def propagate_missing_parts(
+    folder_reports: Dict[str, Dict[str, List[str]]], folders: Dict[str, set[Path]]
+):
+    for folder, reports in folder_reports.items():
+        for song, parts in reports.items():
+            if len(parts) == 0:
+                replacements = REPLACEMENTS.get(folder, [])
+                for rep in replacements:
+                    replacement_songs = {e for e in folders[rep] if song in str(e)}
+                    folders[folder] = folders[folder].union(replacement_songs)
+                    break
+    return folders
+
+
+def main():
+    folders = create_folders()
+    folder_reports = create_folder_reports(folders)
+    folders = propagate_missing_parts(folder_reports, folders)
+    folders = sort_folders(folders)
 
     # create the pdfs for each folder
-    create_folder_pdfs(sorted_folders)
+    create_folder_pdfs(folders)
 
 
 if __name__ == "__main__":
