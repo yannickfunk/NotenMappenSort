@@ -9,7 +9,47 @@ from tqdm import tqdm
 SHEET_FOLDER_PATH = Path("/mnt/c/Users/Yannick/Noten-Cropped")
 OUTPUT_PATH = Path("/mnt/c/Users/Yannick/Notenmappen-Sortiert")
 
-REPERTOIRE = os.listdir(SHEET_FOLDER_PATH)
+REPERTOIRE = [
+    "Abel_Tasman",
+    "Angels",
+    "Astronauten-Marsch",
+    "Auf_der_Vogelwiese",
+    "Bis_bald_auf_Wiederseh'n",
+    "Blas'_Musik_in_die_Welt!",
+    "Böhmische_Liebe",
+    "Böhmischer_Traum",
+    "Dem_Land_Tirol_die_Treue",
+    "Die_Fischerin_vom_Bodensee",
+    "Die_Sonne_geht_auf",
+    "Ein_Leben_Lang",
+    "Ein_neuer_Tag",
+    "Ein_Prosit",
+    "Euphoria",
+    "Für_Helena",
+    "Griechischer_Wein",
+    "Hoch_Badnerland",
+    "Im_Eilschritt_nach_Sankt_Peter",
+    "In_der_Weinschenke",
+    # "Jahresringe",
+    "Juventas-Marsch",
+    "Katharinen-Polka",
+    "Laubener_Schnellpolka",
+    "Löffel-Polka",
+    "Maxglaner_Reloaded",
+    "Morgenblüten",
+    "Partyplanet",
+    "Pfeffer_und_Salz",
+    "Polka_mit_Herz",
+    "Rosamunde",
+    "Schunkelparade_Nr.2",
+    "Stelldichein_in_Oberkrain",
+    "Unsere_Reise_Woodstock",
+    "Viva_la_Vida_Woodstock",
+    "Von_Freund_zu_Freund_Woodstock",
+    "Wenn_der_Wein_blüht",
+    "Wir_Musikanten",
+    "Zwei_Herzen_Wachen_auf",
+]
 
 # define which folder contains which parts
 FOLDER_TO_PART = {
@@ -19,15 +59,31 @@ FOLDER_TO_PART = {
     "1. Klarinette": ["Klarinette_1_B"],  # 1 mal
     "2. Klarinette": ["Klarinette_23_B", "Klarinette_2_B"],  # 1 mal
     "3. Klarinette": ["Klarinette_23_B", "Klarinette_3_B"],  # 1 mal
-    "Es-Klarinette": ["Klarinette_Es", "Klarinette_2_Es"],  # 1 mal
-    "1. Alt-Saxophon": ["Alt-Saxophon_1_Es", "Alt-Saxophon_Es"],  # 1 mal
-    "2. Alt-Saxophon": ["Alt-Saxophon_2_Es", "Alt-Saxophon_Es"],  # 1 mal
+    "Es-Klarinette": [
+        "Klarinette_Es",
+        "Klarinette_2_Es",
+        "Klarinette_E",
+        "Klarinette_2_E",
+    ],  # 1 mal
+    "1. Alt-Saxophon": [
+        "Alt-Saxophon_1_Es",
+        "Alt-Saxophon_Es",
+        "Alt-Saxophon_1_E",
+        "Alt-Saxophon_E",
+    ],  # 1 mal
+    "2. Alt-Saxophon": [
+        "Alt-Saxophon_2_Es",
+        "Alt-Saxophon_Es",
+        "Alt-Saxophon_2_E",
+        "Alt-Saxophon_E",
+    ],  # 1 mal
     "Tenor-Saxophon + BariSax": [
         "Tenor-Saxophon_1_B",
         "Tenor-Saxophon_12_B",
         "Tenor-Saxophon_2_B",
         "Tenor-Saxophon_B",
         "Bariton-Saxophon_Es",
+        "Bariton-Saxophon_E",
     ],  # 1 mal
     "1. Trompete": ["Trompete_1_B", "Trompete_B", "Trompete_Solo_B"],  # 1 mal
     "2. Trompete": ["Trompete_2_B", "Tompete_2_B"],  # 1 mal
@@ -68,8 +124,8 @@ FOLDER_TO_PART = {
         "Posaune_3_C_Bass",
         "Posaune_Begleitung_3_C",
     ],  # 1 mal
-    "Bariton in B": ["Bariton_B", "Bariton_B_Violin"],  # 2 mal
-    "Bariton in C": ["Bariton_C"],  # 2 mal
+    "Bariton in B": ["Bariton_B", "Bariton_1_B", "Bariton_B_Violin"],  # 2 mal
+    "Bariton in C": ["Bariton_C", "Bariton_1_C"],  # 2 mal
     "1. Bass in C": ["Bass_1_C", "Bass_C"],  # 1 mal
     "2. Bass in C": ["Bass_2_C", "Bass_C"],  # 1 mal
     "Bass in B + Eb": [
@@ -78,6 +134,8 @@ FOLDER_TO_PART = {
         "Bass_B_Violin",
         "Bass_1_Es",
         "Bass_Es",
+        "Bass_1_E",
+        "Bass_E",
         "Bass_Es_Violin",
         "Bass_2_B",
     ],  # 1 mal
@@ -109,6 +167,9 @@ REPLACEMENTS = {
     "3. + 4. Trompete": ["2. Trompete", "1. Trompete"],
     "2. Flügelhorn": ["1. Flügelhorn", "2. Trompete"],
     "1. Flügelhorn": ["1. Trompete"],
+    "Bariton in B": ["2. Tenorhorn in B", "1. Tenorhorn in B"],
+    "Bariton in C": ["2. Posaune", "1. Posaune"],
+    "1. Bass in C": ["2. Bass in C"],
 }
 
 # make reverse dict for later sorting

@@ -16,6 +16,7 @@ SINGLE_PAGE_DOUBLE_SHEETS = [
     "Stelldichein_in_Oberkrain",
     "Unsere_Reise_Woodstock",
     "Von_Freund_zu_Freund_Woodstock",
+    "Florentiner_Marsch",
 ]
 
 
